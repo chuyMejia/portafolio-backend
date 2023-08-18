@@ -23,7 +23,7 @@ var controller ={
 		var project = new Project();
 
 		var params = req.body;
-
+//chuy git
 		project.name = params.name;
 		project.description = params.description;
 		project.category = params.category;
