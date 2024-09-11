@@ -2,6 +2,9 @@
 
 var Project = require('../models/project');
 
+
+var Ref = require('../models/referencia');
+
 var fs = require('fs');
 
 var path = require('path');
@@ -61,7 +64,60 @@ var controller ={
 		});*/
 
 
+	},saveRef:function(req,res){
+
+		var referencia = new Ref();
+
+		var params = req.body;
+
+		console.log('Datos recibidos:', req.body);
+
+		//return res.status(200).send({message:params});
+	
+//chuy git
+		referencia.cliente = params.CLIENTE;
+		referencia.referencia = params.REFERENCIA;
+
+
+		referencia.validate()
+		.then(() => {
+		    // Validación exitosa, continuar con el guardado
+		    return referencia.save();
+		  })
+		 .then(referenciaStored => {
+		    console.log('Documento guardado:', referenciaStored);
+		    return res.status(200).send({referencia:referenciaStored});
+		  })
+		  .catch(error => {
+		    console.error('Error al guardar el documento:', error);
+		    if(error) res.status(500).send({
+		    	error:error,
+		    	message:'Error en la peticion '});
+		  });
+
+	
+
+
 	},
+	getProjectByCliente: async (req, res) => {
+		try {
+		  const cliente = req.params.cliente;
+		  
+		  // Buscar un documento por el valor del campo cliente
+		  const project = await Ref.findOne({ cliente: cliente });
+		  
+		  if (!project) {
+			return res.status(404).send({ message: 'No se encontró ningún proyecto con ese cliente' });
+		  }
+		  
+		  return res.status(200).send({ project });
+		} catch (error) {
+		  console.error('Error al obtener el proyecto:', error);
+		  return res.status(500).send({ message: 'Error en el servidor' });
+		}
+	  },
+
+
 	getProject:function(req,res){
 
 		var projectId = req.params.id;
@@ -103,6 +159,30 @@ var controller ={
 	getProjects:function(req,res){	
 		//Project.find({year:2023}).exec()
 	Project.find({}).sort('+year').exec()
+		.then((allobjects)=>{
+			console.log(allobjects);
+			return res.status(200).send({allobjects:allobjects});
+
+		}).catch(err=>{
+			console.log(err);
+			return res.status(500).send({message:err});
+
+		});
+
+
+/*		Project.find({}).exec((err,projects)=>{
+
+			if(err) return res.status(500).send({message:'error al devolver los datos'});
+			if(!projects) return res.status(404).send({message:'no hay projectos'});
+
+			return res.status(200).send({projects:projects})
+
+		});*/
+
+	},
+	getRefs:function(req,res){	
+		//Project.find({year:2023}).exec()
+		Ref.find({}).sort('+year').exec()
 		.then((allobjects)=>{
 			console.log(allobjects);
 			return res.status(200).send({allobjects:allobjects});
